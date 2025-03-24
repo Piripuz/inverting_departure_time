@@ -185,8 +185,8 @@ arc_len = .5
 text_dist = .4
 fig_cost, ax_cost = plt.subplots(figsize=(6, 4))
 x = np.linspace(6.5, 11.5, 300)
-ax_cost.plot(x, cost(tt_cost)(x, b, g, star))
-ax_cost.plot(x, tt_cost.f(x))
+ax_cost.plot(x, cost(tt_cost)(x, b, g, star), label=r"Cost function $C(t_a)$")
+ax_cost.plot(x, tt_cost.f(x), label = r"Travel time $tt_a(t_a)$")
 g_arc = Arc([star + x_g, cost(tt_cost)(star + x_g, b, g, star)], arc_len,
             arc_len*ax_cost.get_data_ratio()**(1/2), theta2=np.degrees(np.arctan(g)), color=late_color)
 b_arc = Arc([star - x_b, cost(tt_cost)(star - x_b, b, g, star)], arc_len,
@@ -208,4 +208,6 @@ ax_cost.text(star - x_b - text_dist, cost(tt_cost)(star - x_b, b, g, star) +
 
 ax_cost.set_yticks([])
 ax_cost.set_xlabel(r"$t_a$ (h)")
+ax_cost.legend()
 fig_cost.savefig("slides/img/cost.png", dpi=600)
+plt.close(fig_cost)
