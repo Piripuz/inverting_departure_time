@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch, Arc
 import numpy as np
-from generate_data import  generate_arrival
+from generate_data import  generate_arrival, cost
 from travel_times import asymm_gaussian_plateau
 from utils import TravelTime
 from find_points import find_bs, find_gs
@@ -12,6 +12,7 @@ import jax.numpy as jnp
 #%%
 
 tt = TravelTime(asymm_gaussian_plateau(sigma_l=.7, sigma_r=.4, plateau_len=.4))
+tt_cost = TravelTime(asymm_gaussian_plateau(sigma_l=.7, sigma_r=.4, plateau_len=.1))
 
 num = 1000
 par = [.8, 1.4, 9.5, .3, 1]
@@ -173,3 +174,38 @@ ax_ctb.plot(par[0], par[1], 'or')
 ax_ctb.set_xlabel(r"$\mu_\beta$")
 ax_ctb.set_ylabel(r"$\mu_\gamma$")
 fig_ctb.savefig("slides/img/contour_ugly.png", dpi=600)
+
+#%%
+
+
+b, g, star = (.6, 1.2, 9.4)
+x_g = 1.3
+x_b = 1.8
+arc_len = .5
+text_dist = .4
+fig_cost, ax_cost = plt.subplots(figsize=(6, 4))
+x = np.linspace(6.5, 11.5, 300)
+ax_cost.plot(x, cost(tt_cost)(x, b, g, star))
+ax_cost.plot(x, tt_cost.f(x))
+g_arc = Arc([star + x_g, cost(tt_cost)(star + x_g, b, g, star)], arc_len,
+            arc_len*ax_cost.get_data_ratio()**(1/2), theta2=np.degrees(np.arctan(g)), color=late_color)
+b_arc = Arc([star - x_b, cost(tt_cost)(star - x_b, b, g, star)], arc_len,
+            arc_len*ax_cost.get_data_ratio()**(1/2), angle=180, theta1=-np.degrees(np.arctan(b)), color=early_color)
+ax_cost.add_patch(g_arc)
+ax_cost.add_patch(b_arc)
+
+ax_cost.plot([star + x_g, star + x_g + arc_len], [cost(tt_cost)(star + x_g, b, g, star)]*2, color=late_color)
+ax_cost.plot([star - x_b, star - x_b - arc_len], [cost(tt_cost)(star - x_b, b, g, star)]*2, color=early_color)
+
+ax_cost.text(star + x_g + text_dist, cost(tt_cost)(star + x_g, b, g, star) +
+           text_dist*ax_cost.get_data_ratio(),
+           r"arctan$(\gamma)$", size=8, color=late_color, ha='left')
+
+ax_cost.text(star - x_b - text_dist, cost(tt_cost)(star - x_b, b, g, star) +
+             text_dist*ax_cost.get_data_ratio()**(2),
+             r"arctan$(\beta)$", size=8, color=early_color, ha='right')
+
+
+ax_cost.set_yticks([])
+ax_cost.set_xlabel(r"$t_a$ (h)")
+fig_cost.savefig("slides/img/cost.png", dpi=600)
