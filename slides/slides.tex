@@ -139,6 +139,17 @@
   For problems with numerical stability, this approach is not fully developed yet, but will be explored in the future.
 \end{frame}
 
+\begin{frame}
+  \frametitle{Computation of the likelihood function}
+  The likelihood is not easy to compute, and can only be approximated numerically.
+
+  \begin{itemize}
+  \item Different numerical methods are used to compute each point's likelihood
+  \item Once the total likelihood is computed, a gradient-free optimization method is used to find the best parameters
+  \item Hardware accelerated computing is extensively used to quickly compute the likelihood values
+  \end{itemize}
+\end{frame}
+
 \begin{frame}{Properties of the likelihood function}
   Given a dataset, the likelihood function is thus defined on a five-dimensional space.
 
