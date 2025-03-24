@@ -185,8 +185,8 @@ arc_len = .5
 text_dist = .4
 fig_cost, ax_cost = plt.subplots(figsize=(6, 4))
 x = np.linspace(6.5, 11.5, 300)
-ax_cost.plot(x, cost(tt_cost)(x, b, g, star), label=r"Cost function $C(t_a)$")
-ax_cost.plot(x, tt_cost.f(x), label = r"Travel time $tt_a(t_a)$")
+ax_cost.plot(x, cost(tt_cost)(x, b, g, star), label=r"Cost function $C(t_a)$", color="orange")
+ax_cost.plot(x, tt_cost.f(x), label = r"Travel time $tt_a(t_a)$", color=tt_color)
 g_arc = Arc([star + x_g, cost(tt_cost)(star + x_g, b, g, star)], arc_len,
             arc_len*ax_cost.get_data_ratio()**(1/2), theta2=np.degrees(np.arctan(g)), color=late_color)
 b_arc = Arc([star - x_b, cost(tt_cost)(star - x_b, b, g, star)], arc_len,
@@ -205,9 +205,12 @@ ax_cost.text(star - x_b - text_dist, cost(tt_cost)(star - x_b, b, g, star) +
              text_dist*ax_cost.get_data_ratio()**(2),
              r"arctan$(\beta)$", size=8, color=early_color, ha='right')
 
+dashed_t = ax_cost.plot([star]*2, [tt_cost.f(star), 0], '--')
+ax_cost.text(star + .1, .1, r"$t^*$", size=10, ha="left", color=dashed_t[0].get_color())
 
 ax_cost.set_yticks([])
 ax_cost.set_xlabel(r"$t_a$ (h)")
 ax_cost.legend()
 fig_cost.savefig("slides/img/cost.png", dpi=600)
+# fig_cost.show()
 plt.close(fig_cost)
