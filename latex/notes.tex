@@ -609,6 +609,30 @@ Plugging the last equations in the expression for \(f_{T_a}\) yields
   + \frac{f_\gamma(-tt_a'(t_a))\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(-tt_a'(t_a) < \gamma_0(s)) ds}{\int_{-\infty}^\infty f_\gamma(t)\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(t < \gamma_0(s)) ds dt}[tt_a''(t_a)]^+ \int_1^{\gamma_\text{max}}\int_{g_i(g)}^{g_e(g)} f_{T^*}(t)dtf_\gamma(g)dg
 \end{multline}
 
+\subsubsection{Zhenyu's version}
+
+According to Zhenyu, we have
+
+\begin{equation*}
+  \mathbb{P}(T_a = t_a, \hat{Q} = -1) = \mathbb{P}(t^* \in (b_i(\beta), b_e(\beta)), t_a = b_i(\beta)))
+\end{equation*}
+where \(\{\hat{Q} = -1\} = \{L = 0, Q = 1\}\).
+
+Since the two events are independent, this yields, on pdf,
+\begin{align*}
+  f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), b_e(\beta)))f_{b_i(\beta)}(t_a) \\
+  & = \mathbb{P}(\beta < \beta_0(t^*)) f_\beta(b_i^{-1}(t_a)) \diff{b_i^{-1}}{t_a}(t_a) \\
+  & = \int_{-\infty}^\infty f_{T^*}(t) F_\beta(\beta_0(t)) dt\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
+\end{align*}
+
+This would considerably simplify \eqref{eq:final_likelihood}, which would become
+
+\begin{multline}
+  \label{eq:final_zhenyu}
+  f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg \\
+  + \int_{-\infty}^\infty f_{T^*}(t) F_\beta(\beta_0(t)) dt\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+\\
+  + \int_{-\infty}^\infty f_{T^*}(t) F_\gamma(\gamma_0(t)) dt\ f_\gamma(-tt_a'(t_a))[tt_a''(t_a)]^+
+\end{multline}
 \section{Some results}
 
 The likelihood function still has to be improved as it is not always extremely precise. Moreover the handling of large dataset (not really large, more than 1000 samples) has to be fixed.
