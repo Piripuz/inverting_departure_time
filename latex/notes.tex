@@ -417,7 +417,7 @@ Since the values of \(\beta_0, \gamma_0\) can be found by bisection (this becaus
 
 \begin{align*}
   f_{T_a | Q}(t_a | 0) & = \frac{f_{T^*}(t_a)\int_{\beta_0(t_a)}^\infty f_\beta(b)\, db\int_{\gamma_0(t_a)}^\infty f_\gamma(g)\, dg}{\int_{-\infty}^\infty f_{T^*}(t_a)\int_{\beta_0(t_a)}^\infty f_\beta(b)\, db\int_{\gamma_0(t_a)}^\infty f_\gamma(g)\, dgdt_a} \\
-  & = \frac{f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg}{\int_{-\infty}^\infty f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dgdt_a}
+  & = \frac{f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg}{\int_{-\infty}^\infty f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dgdt_a}\tag{\theequation}\label{eq:on_time}
 \end{align*}
 
 Note that the coefficients \(\beta_\text{max}\), \(\gamma_\text{max}\) depend only on the travel time function and can be computed only once per travel time function.
@@ -499,9 +499,10 @@ in practice the pdf is truncated, and the truncation is a weighting based on the
 
 By adding a normalization constant at the denominator, the pdf should thus be
 
-\begin{equation*}
+\begin{equation}
+  \label{eq:pdf_beta_early}
   f_{\beta | L}(tt_a'(t_a) | 0) = \frac{f_\beta(tt_a'(t_a))\mathbb{P}(tt_a'(t_a) < \beta_0(T^*))}{\int_{-\infty}^\infty f_\beta(t)\mathbb{P}(t < \beta_0(T^*)) dt}
-\end{equation*}
+\end{equation}
 
 Now, the only thing not trivial to compute is the probability \(\mathbb{P}(tt_a'(t) < \beta_0(T^*))\).
 Instead of using the cdf \(F_{T^*}\) inverting \(\beta_0\) (that is not injective), it is probably better to directly evaluate it using an integral:
@@ -543,6 +544,70 @@ and similarly for \(\gamma\),
   \label{eq:prob_in_gamma}
   \mathbb{P}(L=1, Q=1) = \int_1^{\gamma_\text{max}}\int_{g_i(g)}^{g_e(g)} f_{T^*}(t)dtf_\gamma(g)dg
 \end{equation}
+
+\subsection{Summing up}
+
+Still, for the case in which \(\beta\) and \(\gamma\) don't interact.
+
+The pdf for \(T_a\) will be, from \eqref{eq:likelihood_split},
+\begin{equation*}
+  f_{T_a}(t_a) = f_{T_a | Q}(t_a | 0)\mathbb{P}(Q = 0) + f_{T_a | Q}(t_a | 1)\mathbb{P}(Q = 1)
+\end{equation*}
+
+By using the result in \eqref{eq:on_time},
+
+\begin{equation*}
+  f_{T_a | Q}(t_a | 0)\mathbb{P}(Q = 0) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg
+\end{equation*}
+and so,
+
+\begin{equation*}
+  f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg + f_{T_a | Q}(t_a | 1)\mathbb{P}(Q = 1)
+\end{equation*}
+
+In \eqref{eq:internal_split}, \(f_{T_a | Q}(t_a | 1)\) is split:
+
+\begin{equation*}
+  f_{T_a | Q}(t_a | 1) =  f_{T_a | L, Q}(t_a | 0, 1) \mathbb{P}(L=0 | Q=1) + f_{T_a | L, Q}(t_a | 1, 0) \mathbb{P}(L=1 | Q=1)
+\end{equation*}
+
+This yields
+
+\begin{multline*}
+  f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg + f_{T_a | L, Q}(t_a | 0, 1) \mathbb{P}(L=0 | Q=1)\mathbb{P}(Q = 1) \\ + f_{T_a | L, Q}(t_a | 1, 0) \mathbb{P}(L=1 | Q=1)\mathbb{P}(Q = 1)
+\end{multline*}
+
+By using together \eqref{eq:pdf_early} and \eqref{eq:pdf_beta_early}, we have
+
+\begin{equation*}
+  f_{T_a | L, Q}(t_a | 0, 1) = \frac{f_\beta(tt_a'(t_a))\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(tt_a'(t) < \beta_0(s)) ds}{\int_{-\infty}^\infty f_\beta(t)\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(tt_a'(t) < \beta_0(s)) ds dt}[tt_a''(t_a)]^+ 
+\end{equation*}
+or, for late arrivals,
+\begin{equation*}
+  f_{T_a | L, Q}(t_a | 1, 1) = \frac{f_\gamma(-tt_a'(t_a))\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(-tt_a'(t) < \gamma_0(s)) ds}{\int_{-\infty}^\infty f_\gamma(t)\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(-tt_a'(t) < \gamma_0(s)) ds dt}[tt_a''(t_a)]^+ 
+\end{equation*}
+
+Finally, \eqref{eq:prob_int_beta} yields
+
+\begin{align*}
+  \mathbb{P}(L=0 | Q=1)\mathbb{P}(Q = 1) & = \mathbb{P}(L=0, Q=1) \\
+  & = \int_0^{\beta_\text{max}}\int_{b_i(b)}^{b_e(b)} f_{T^*}(t)dtf_\beta(b)db
+\end{align*}
+and, respectively, \eqref{eq:prob_in_gamma}
+
+\begin{align*}
+  \mathbb{P}(L=0 | Q=1)\mathbb{P}(Q = 1) & = \mathbb{P}(L=0, Q=1) \\
+  & = \int_1^{\gamma_\text{max}}\int_{g_i(g)}^{g_e(g)} f_{T^*}(t)dtf_\gamma(g)dg
+\end{align*}
+
+Plugging the last equations in the expression for \(f_{T_a}\) yields
+
+\begin{multline}
+  \label{eq:final_likelihood}
+  f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg \\
+  + \frac{f_\beta(tt_a'(t_a))\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(tt_a'(t_a) < \beta_0(s)) ds}{\int_{-\infty}^\infty f_\beta(t)\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(t < \beta_0(s)) ds dt}[tt_a''(t_a)]^+ \int_0^{\beta_\text{max}}\int_{b_i(b)}^{b_e(b)} f_{T^*}(t)dtf_\beta(b)db \\
+  + \frac{f_\gamma(-tt_a'(t_a))\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(-tt_a'(t_a) < \gamma_0(s)) ds}{\int_{-\infty}^\infty f_\gamma(t)\int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(t < \gamma_0(s)) ds dt}[tt_a''(t_a)]^+ \int_1^{\gamma_\text{max}}\int_{g_i(g)}^{g_e(g)} f_{T^*}(t)dtf_\gamma(g)dg
+\end{multline}
 
 \section{Some results}
 
