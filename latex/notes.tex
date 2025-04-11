@@ -406,8 +406,8 @@ The point in which arriving late costs as much as arriving early is thus the one
 \begin{align*}
   C_b(t_s) & = C_g(t_s) \\
   (t_s - b_i(\beta))\beta + tt_a(b_i(\beta)) & = -(t_s - g_e(\gamma))\gamma + tt_a(g_e(\gamma)) \\
-  (\beta + \gamma)t_s & = (\beta b_i(\beta) - tt_a(b_i(\beta))) - (\gamma g_e(\gamma) - tt_a(g_e(\gamma))) \\
-  t_s(\beta, \gamma) & = \frac{(\beta b_i(\beta) - tt_a(b_i(\beta))) - (\gamma g_e(\gamma) - tt_a(g_e(\gamma)))}{(\beta + \gamma)}
+  (\beta + \gamma)t_s & = \beta b_i(\beta) - tt_a(b_i(\beta)) + \gamma g_e(\gamma) + tt_a(g_e(\gamma)) \\
+  t_s(\beta, \gamma) & = \frac{\beta b_i(\beta) - tt_a(b_i(\beta)) + \gamma g_e(\gamma) + tt_a(g_e(\gamma))}{(\beta + \gamma)}
 \end{align*}
 
 \subsection{Probability of the point being a kink minimum}
@@ -704,15 +704,15 @@ This would considerably simplify \eqref{eq:final_likelihood}, which would become
 This seems like it is working!! Let's extend it to the case in which \textcolor{orange}{\(\gamma\) and \(\beta\) interact}.
 
 \begin{align*}
-    f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), t_s(\beta, \gamma)) | b_i(\beta) = t_a)f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
-  & = \mathbb{P}(t^* \in (t_a, t_s(tt_a'(t_a), \gamma)))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
-  & = \int_1^\infty f_\gamma(x) (F_{T^*}(t_s(tt_a'(t_a), x)) - F_{T^*}(t_a)) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
+    f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), \min(b_e(\beta), t_s(\beta, \gamma)))) | b_i(\beta) = t_a)f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  & = \mathbb{P}(t^* \in (t_a, \min(b_e(tt_a'(t_a)), t_s(tt_a'(t_a), \gamma))))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  & = \int_1^\infty f_\gamma(x) (F_{T^*}(\min(b_e(tt_a'(t_a)), t_s(tt_a'(t_a), x))) - F_{T^*}(t_a)) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
 \end{align*}
 
 Similarly, for late arrivals,
 
 \begin{equation*}
-  f_{T_a, \hat{Q}}(t_a, 1) = \int_0^1 f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(t_s(x, -tt_a'(t_a))) ) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
+  f_{T_a, \hat{Q}}(t_a, 1) = \int_0^1 f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(\max(g_i(-tt_a'(t_a)), t_s(x, -tt_a'(t_a)))) ) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
 \end{equation*}
 
 The total expression for the likelihood \eqref{eq:final_zhenyu} becomes thus
@@ -720,8 +720,8 @@ The total expression for the likelihood \eqref{eq:final_zhenyu} becomes thus
 \begin{multline}
   \label{eq:zhenyu_accounting_int}
   f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg \\
-  + \int_1^\infty f_\gamma(x) (F_{T^*}(t_s(tt_a'(t_a), x)) - F_{T^*}(t_a)) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
-  + \int_0^1f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(t_s(x, -tt_a'(t_a))) ) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+  
+  + \int_1^\infty f_\gamma(x) (F_{T^*}(\min(b_e(tt_a'(t_a)), t_s(tt_a'(t_a), x))) - F_{T^*}(t_a)) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  + \int_0^1f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(\max(g_i(-tt_a'(t_a)), t_s(x, -tt_a'(t_a)))) ) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+  
 \end{multline}
 
 TO BE IMPLEMENTED:
