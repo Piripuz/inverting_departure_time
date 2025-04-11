@@ -618,13 +618,10 @@ According to Zhenyu, we have
 \end{equation*}
 where \(\{\hat{Q} = -1\} = \{L = 0, Q = 1\}\).
 
-They're not \textit{really} independent I think (maybe, or maybe they would be if \(t_a\) was distributed or something like that), and I think that this is what's causing the error in the code.
-
-Since the two events are independent, this yields, on pdf,
 \begin{align*}
-  f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), b_e(\beta)))f_{b_i(\beta)}(t_a) \\
-  & = \mathbb{P}(\beta < \beta_0(t^*)) f_\beta(b_i^{-1}(t_a)) \diff{b_i^{-1}}{t_a}(t_a) \\
-  & = \int_{-\infty}^\infty f_{T^*}(t) F_\beta(\beta_0(t)) dt\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
+  f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), b_e(\beta)) | b_i(\beta) = t_a)f_{b_i(\beta)}(t_a) \\
+  & = \mathbb{P}(t^* \in (t_a, b_e(tt'(t_a)))) f_\beta(b_i^{-1}(t_a)) \diff{b_i^{-1}}{t_a}(t_a) \\
+  & = (F_{T^*}(b_e(tt'(t_a))) - F_{T^*}(t_a))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
 \end{align*}
 
 This would considerably simplify \eqref{eq:final_likelihood}, which would become
@@ -632,8 +629,8 @@ This would considerably simplify \eqref{eq:final_likelihood}, which would become
 \begin{multline}
   \label{eq:final_zhenyu}
   f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg \\
-  + \int_{-\infty}^\infty f_{T^*}(t) F_\beta(\beta_0(t)) dt\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+\\
-  + \int_{-\infty}^\infty f_{T^*}(t) F_\gamma(\gamma_0(t)) dt\ f_\gamma(-tt_a'(t_a))[tt_a''(t_a)]^+
+  + (F_{T^*}(b_e(tt'(t_a))) - F_{T^*}(t_a))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  + (F_{T^*}(t_a) - F_{T^*}(g_i(-tt'(t_a)))) f_\gamma(-tt_a'(t_a))[tt_a''(t_a)]^+
 \end{multline}
 \section{Some results}
 
