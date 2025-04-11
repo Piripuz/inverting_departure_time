@@ -365,13 +365,61 @@ We now have a complete characterization of the function \(ot\):
 
 We can thus see a bit better what equation \eqref{eq:likelihood_split} means, since we know where the internal minima are and where the kink actually minimizes the cost function.
 
+\subsubsection{If early arrivals and late arrivals intersect \textcolor{orange}{below} the travel time function}
+
+\textcolor{orange}{Getting rid of the assumption!}
+
+First of all, we need to define a new point, and the function \textcolor{orange}{\(ot(t^*)\)} will have a new form.
+
+Let thus \(t_s(\beta, \gamma)\) be the point corresponding to a desired arrival time \(t^*\) for which arriving late or early makes no difference.
+This point will be interesting when its cost will be smaller than the cost of arriving on time (since, when the cost of arriving on time will be smaller,
+we can just forget the position of this point and yield an on-time arrival for every point in a neighbourhood of it).
+In this case, we have three points \(b_e(\beta), g_i(\gamma)\) and \(t_s(\beta, \gamma)\),
+and the only allowed orderings (in the case in which at least two of them are distinct) for them are two:
+either
+\begin{equation}\label{eq:simple_ordering}
+  b_e(\beta) < t_s(\beta, \gamma) < g_i(\gamma)
+\end{equation}
+or
+\begin{equation}\label{eq:complex_ordering}
+  b_e(\beta) > t_s(\beta, \gamma) > g_i(\gamma)
+\end{equation}
+
+This can be easily proved directly, case by case (and is pretty trivial).
+
+In case \eqref{eq:simple_ordering}, the assumption \(b_e(\beta) < g_i(\gamma)\) clearly holds, and there's nothing more to discuss.
+
+Otherwise, minimizing the cost function will yield an early arrival until the point \(t_s(\beta, \gamma)\), and a late arrival after that point.
+
+Let's then model that point, given \(\beta\), \(\gamma\).
+
+The line representing the cost of arriving early, in function of \(t^*\), is
+\begin{equation*}
+  C_b(t) = (t - b_i(\beta))\beta + tt_a(b_i(\beta))
+\end{equation*}
+similarly, arriving late costs
+\begin{equation*}
+  C_g(t) = -(t - g_e(\gamma))\gamma + tt_a(g_e(\gamma))
+\end{equation*}
+
+The point in which arriving late costs as much as arriving early is thus the one that realizes
+\begin{align*}
+  C_b(t_s) & = C_g(t_s) \\
+  (t_s - b_i(\beta))\beta + tt_a(b_i(\beta)) & = -(t_s - g_e(\gamma))\gamma + tt_a(g_e(\gamma)) \\
+  (\beta + \gamma)t_s & = (\beta b_i(\beta) - tt_a(b_i(\beta))) - (\gamma g_e(\gamma) - tt_a(g_e(\gamma))) \\
+  t_s(\beta, \gamma) & = \frac{(\beta b_i(\beta) - tt_a(b_i(\beta))) - (\gamma g_e(\gamma) - tt_a(g_e(\gamma)))}{(\beta + \gamma)}
+\end{align*}
+
 \subsection{Probability of the point being a kink minimum}
 
 The event \textit{being a kink minimum} can thus be decomposed in \textit{being a realization of the random variable \(T^*\)} and \textit{not being into an interval that would yield an internal minimum}.
 
 These events are independent, since \(T^*\) is independent from the variables \(\gamma\) and \(\beta\) that decide the intervals.
 
-The pdf for the variable \(K\) will thus be
+\textcolor{orange}{Please note}, this doesn't rely on the assumption of \(b_e(\beta) < g_i(\gamma)\),
+since union of intervals works equally well for disjoint and intersecting intervals.
+
+The pdf will thus be
 
 \begin{equation}
   \label{eq:prob_kink}
@@ -446,6 +494,8 @@ the conditional pdf \(f_{I | L}(t_a | 0)\) and the probability \(\mathbb{P}(L=0 
 
 \textcolor{red}{From now on, I am neglecting the effect of $\gamma$ on early arrivals (and will neglect the effect of $\beta$ on late arrivals). This is probably ok as long as I am assuming the intervals yielded by the parameters to be disjoint, will have to be looked at better once the intervals are not disjoint anymore.}
 
+\textcolor{orange}{Not anymore!}
+
 \(f_{I | L}(t_a | 0)\) is the distribution arising from applying the transformation \(b_i\) to a variable distributed as \(\beta\) (similarly for \(\gamma\)).
 
 We have
@@ -476,6 +526,9 @@ and, analogously,
 Now, what is the distribution of \(\beta\) (and \(\gamma\)) given that an early (respectively, late) solution is found?
 As always, consider the case in which the solution is an early arrival.
 As noted earlier, a solution is an early arrival if and only if \(T^* \in (b_i(\beta), b_e(\beta))\), or, equivalently, \(\beta < \beta_0(T^*)\)
+
+\textcolor{orange}{Actually, by dropping the assumption this changes}:
+A solution is an early arrival if and only if \(T^* \in (b_i(\beta), t_s(\beta, \gamma))\)
 
 To understand better what is going on, I will explicitly write the cdf.
 
@@ -510,7 +563,7 @@ Instead of using the cdf \(F_{T^*}\) inverting \(\beta_0\) (that is not injectiv
   \mathbb{P}(tt_a'(t) < \beta_0(T^*)) = \int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(tt_a'(t) < \beta_0(s)) ds
 \end{equation*}
 
-Similarily, for \(\gamma\)
+Similarly, for \(\gamma\)
 \begin{equation*}
   f_{\gamma | L}(-tt_a'(t_a) | 1) = \frac{f_\gamma(-tt_a'(t_a))\mathbb{P}(-tt_a'(t_a) < \gamma_0(T^*))}{\int_{-\infty}^\infty f_\gamma(t)\mathbb{P}(t < \gamma_0(T^*)) dt}
 \end{equation*}
@@ -521,11 +574,26 @@ and
   \mathbb{P}(-tt_a'(t) < \gamma_0(T^*)) = \int_{-\infty}^\infty f_{T^*}(s) \mathbb{1}(-tt_a'(t) < \gamma_0(s)) ds
 \end{equation*}
 
+\textcolor{orange}{Now, dropping the assumption of early and late not touching}:
+instead of \(\mathbb{P}(\beta < \beta_0(T^*))\),
+we have to estimate the probability
+\[\mathbb{P}(t^* \in (b_i(\beta), t_s(\beta, \gamma)), T^* = t^*)\].
+
+This means that \(\beta\) has to be sufficiently little for \(t^*\) to fall in the interval \((b_i, b_e)\) but \textcolor{orange}{that's not enough!!}
+On top of this, \(\gamma\) has to be sufficiently big for \(t^*\) not to be in the interval \((g_i, g_e)\).
+
+The probability can thus be reformulated as
+
+\begin{equation}
+  \label{eq:prob_gamabeta}
+  \mathbb{P}(t^* \in (b_i(\beta), t_s(\beta, \gamma)), T^* = t^*) = \prob
+\end{equation}
+
 \subsubsection{Estimation of $\mathbb{P}(L=0 | Q=1)$}
 
 The only thing that is left is now to compute the probabilities \(\mathbb{P}(L=1 | Q=1)\), \(\mathbb{P}(L=0 | Q=1)\).
 
-As it turns out, it is easier to just compute the joint probability \(\mathbb{P}(L, Q\) instead of the conditional one, and the conditional one will then be simplified when substituting in \eqref{eq:likelihood_split}.
+As it turns out, it is easier to just compute the joint probability \(\mathbb{P}(L, Q)\) instead of the conditional one, and the conditional one will then be simplified when substituting in \eqref{eq:likelihood_split}.
 
 The probability \(\mathbb{P}(L=0, Q=1)\) will be exactly the probability that \(t^*\) is in the interval \((b_i(b), b_e(b))\), for some realization of the variable \(\beta\ b\).
 
@@ -614,14 +682,14 @@ Plugging the last equations in the expression for \(f_{T_a}\) yields
 According to Zhenyu, we have
 
 \begin{equation*}
-  \mathbb{P}(T_a = t_a, \hat{Q} = -1) = \mathbb{P}(t^* \in (b_i(\beta), b_e(\beta)), t_a = b_i(\beta)))
+  \mathbb{P}(T_a = t_a, \hat{Q} = -1) = \mathbb{P}(t^* \in (b_i(\beta), b_e(\beta)), t_a = b_i(\beta))
 \end{equation*}
 where \(\{\hat{Q} = -1\} = \{L = 0, Q = 1\}\).
 
 \begin{align*}
   f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), b_e(\beta)) | b_i(\beta) = t_a)f_{b_i(\beta)}(t_a) \\
-  & = \mathbb{P}(t^* \in (t_a, b_e(tt'(t_a)))) f_\beta(b_i^{-1}(t_a)) \diff{b_i^{-1}}{t_a}(t_a) \\
-  & = (F_{T^*}(b_e(tt'(t_a))) - F_{T^*}(t_a))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
+  & = \mathbb{P}(t^* \in (t_a, b_e(tt_a'(t_a)))) f_\beta(b_i^{-1}(t_a)) \diff{b_i^{-1}}{t_a}(t_a) \\
+  & = (F_{T^*}(b_e(tt_a'(t_a))) - F_{T^*}(t_a))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
 \end{align*}
 
 This would considerably simplify \eqref{eq:final_likelihood}, which would become
@@ -629,9 +697,41 @@ This would considerably simplify \eqref{eq:final_likelihood}, which would become
 \begin{multline}
   \label{eq:final_zhenyu}
   f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg \\
-  + (F_{T^*}(b_e(tt'(t_a))) - F_{T^*}(t_a))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
-  + (F_{T^*}(t_a) - F_{T^*}(g_i(-tt'(t_a)))) f_\gamma(-tt_a'(t_a))[tt_a''(t_a)]^+
+  + (F_{T^*}(b_e(tt_a'(t_a))) - F_{T^*}(t_a))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  + (F_{T^*}(t_a) - F_{T^*}(g_i(-tt_a'(t_a)))) f_\gamma(-tt_a'(t_a))[tt_a''(t_a)]^+
 \end{multline}
+
+This seems like it is working!! Let's extend it to the case in which \textcolor{orange}{\(\gamma\) and \(\beta\) interact}.
+
+\begin{align*}
+    f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), t_s(\beta, \gamma)) | b_i(\beta) = t_a)f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  & = \mathbb{P}(t^* \in (t_a, t_s(tt_a'(t_a), \gamma)))f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  & = \int_1^\infty f_\gamma(x) (F_{T^*}(t_s(tt_a'(t_a), x)) - F_{T^*}(t_a)) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
+\end{align*}
+
+Similarly, for late arrivals,
+
+\begin{equation*}
+  f_{T_a, \hat{Q}}(t_a, 1) = \int_0^1 f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(t_s(x, -tt_a'(t_a))) ) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+
+\end{equation*}
+
+The total expression for the likelihood \eqref{eq:final_zhenyu} becomes thus
+
+\begin{multline}
+  \label{eq:zhenyu_accounting_int}
+  f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg \\
+  + \int_1^\infty f_\gamma(x) (F_{T^*}(t_s(tt_a'(t_a), x)) - F_{T^*}(t_a)) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
+  + \int_0^1f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(t_s(x, -tt_a'(t_a))) ) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+  
+\end{multline}
+
+TO BE IMPLEMENTED:
+While the integral here are computed across all the domain of the random variable,
+in the code the integrals are computed over a part of it (e. g. \((0, \beta_\text{max})\) instead of \((0, 1)\)).
+
+A normalization constant has to be added there, to take into account how these domains differ.
+This normalization constant could be computed into the \verb|TravelTime| class as well,
+since it does not depend on \(\beta\), \(\gamma\).
+
 \section{Some results}
 
 The likelihood function still has to be improved as it is not always extremely precise. Moreover the handling of large dataset (not really large, more than 1000 samples) has to be fixed.
