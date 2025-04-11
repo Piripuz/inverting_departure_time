@@ -141,3 +141,11 @@ def find_g0(t_a, travel_time):
         Bisection(isin_obj, min, max, check_bracket=False).run().params,
         jnp.where(is_max, min, max))
     return sol
+
+def find_ts(beta, gamma, travel_time):
+    gamma += 1e-15
+    beta += 1e-15
+    b_i, b_e = find_bs(beta, travel_time)
+    g_i, g_e = find_gs(gamma, travel_time)
+    num = beta * b_i - travel_time.f(b_i) + gamma * g_e + travel_time.f(g_e)
+    return num / (beta + gamma)

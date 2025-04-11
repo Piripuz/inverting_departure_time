@@ -5,7 +5,7 @@ from jax.scipy.stats import truncnorm as jtruncnorm
 from jax.scipy.stats import norm as jnorm
 import jax.numpy as jnp
 
-from find_points import find_bs, find_gs, find_b0, find_g0, find_be, find_gi
+from find_points import find_bs, find_gs, find_b0, find_g0, find_be, find_gi, find_ts
 
 def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
     """Finds the likelihood of a point realizing a minimum, for the
@@ -43,12 +43,22 @@ def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
     t_a_early = jnp.where(jnp.logical_and(travel_time.df(t_a) > 0, travel_time.d2f(t_a) > 0), t_a, 0)
     t_a_late = jnp.where(jnp.logical_and(travel_time.df(t_a) < 0, travel_time.d2f(t_a) > 0), t_a, 24)
     
-    int_early = jnorm.cdf(find_be(t_a_early, travel_time), mu_t, sigma_t) - jnorm.cdf(t_a, mu_t, sigma_t)
+    inner_int_early_cdf = lambda x:  jnorm.cdf(jnp.minimum(find_be(t_a_early, travel_time), find_ts(travel_time.df(t_a_early), x, travel_time)), mu_t, sigma_t) - jnorm.cdf(t_a_early, mu_t, sigma_t)
 
+    inner_int_early = lambda x: inner_int_early_cdf(x) * pdf_g(x)
+
+    x_gamma = jnp.linspace(1, travel_time.maxg, 100)
+
+    int_early = trapezoid(vmap(inner_int_early)(x_gamma), x_gamma, axis=0)
     lik_early = int_early * pdf_b(travel_time.df(t_a)) * relu(travel_time.d2f(t_a))
+    inner_int_late_cdf = lambda x: jnorm.cdf(t_a_late, mu_t, sigma_t) - jnorm.cdf(jnp.maximum(find_gi(t_a_late, travel_time), find_ts(x, -travel_time.df(t_a_late), travel_time)), mu_t, sigma_t)
 
-    int_late = jnorm.cdf(t_a, mu_t, sigma_t) - jnorm.cdf(find_gi(t_a_late, travel_time), mu_t, sigma_t)
-    
+    inner_int_late = lambda x: inner_int_late_cdf(x) * pdf_b(x)
+
+    x_beta = jnp.linspace(1e-2, travel_time.maxb, 100)
+
+    int_late = trapezoid(vmap(inner_int_late)(x_beta), x_beta, axis=0)
+
     lik_late = int_late * pdf_g(-travel_time.df(t_a)) * relu(travel_time.d2f(t_a))
 
     likelihood_internal = lik_early + lik_late
