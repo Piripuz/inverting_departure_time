@@ -19,21 +19,25 @@ def find_bs(beta, travel_time):
     in_obj = lambda x: travel_time.f(x) - beta*x
     solver = GradientDescent(fun=in_obj, acceleration=False, stepsize=stepsize)
     b_i, _ = solver.run(0.)
+    b_e = find_be(b_i, travel_time)
+    # The interval extremes are returned
+    return (b_i, b_e)
 
+def find_be(b_i, travel_time):
     # The final point is found where the line starting from the initial point,
     # whith slope beta, crosses the travel time function.
     # This point is found via a bisection
-        
+
+    beta = travel_time.df(b_i)
+
     fin_obj = lambda x: travel_time.f(x) - beta*(x - b_i) - travel_time.f(b_i)
 
     # Two points where to start the bisection are computed
     step = .5
     high = while_loop(lambda a: fin_obj(a) > 0, lambda a: a + step, b_i + step)
     low = high - step
-    b_e = Bisection(fin_obj, low, high, check_bracket=False).run().params
-
-    # The interval extremes are returned
-    return (b_i, b_e)
+    return Bisection(fin_obj, low, high, check_bracket=False).run().params
+    
     
 def find_b0(t_a, travel_time):
     """ Given an arrival time, finds the maximal beta such that
@@ -83,22 +87,27 @@ def find_gs(gamma, travel_time):
     fin_obj = lambda x: travel_time.f(x) + gamma*x
     solver = GradientDescent(fun=fin_obj, acceleration=False, stepsize=stepsize)
     g_e, state = solver.run(24.)
+    g_i = find_gi(g_e, travel_time)
+    # The interval extremes are returned
+    return (g_i, g_e)
 
+def find_gi(g_e, travel_time):
     # The initial point is found where the line starting from the
     # final point, whith slope -gamma, crosses the travel time
     # function.
     # This point is found via a bisection
-        
+
+    gamma = -travel_time.df(g_e)
+
     fin_obj = lambda x: travel_time.f(x) + gamma*(x - g_e) - travel_time.f(g_e)
 
     # Two points where to start the bisection are computed
     step = .5
     low = while_loop(lambda a: fin_obj(a) > 0, lambda a: a - step, g_e - step)
     high = low + step
-    g_i = Bisection(fin_obj, low, high, check_bracket=False).run().params
+    return Bisection(fin_obj, low, high, check_bracket=False).run().params
 
-    # The interval extremes are returned
-    return (g_i, g_e)
+
 
 def find_g0(t_a, travel_time):
     """Given an arrival time, finds the maximal gamma such that the
@@ -112,7 +121,7 @@ def find_g0(t_a, travel_time):
     # A really low and a really high value are defined as starting
     # points for the bisection
     min = 1
-    max = 20
+    max = travel_time.maxg
 
     # The objective function, an indicator function that shows wether
     # the parameter t_a is in the interval for a given gamma, is

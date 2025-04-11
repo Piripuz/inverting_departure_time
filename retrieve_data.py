@@ -5,7 +5,7 @@ from jax.scipy.stats import truncnorm as jtruncnorm
 from jax.scipy.stats import norm as jnorm
 import jax.numpy as jnp
 
-from find_points import find_bs, find_gs, find_b0, find_g0
+from find_points import find_bs, find_gs, find_b0, find_g0, find_be, find_gi
 
 def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
     """Finds the likelihood of a point realizing a minimum, for the
@@ -31,60 +31,27 @@ def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
     g0 = find_g0(t_a, travel_time)
     likelihood_kink = jnorm.pdf(t_a, mu_t, sigma_t) * (1 - cdf_b(b0)) * (1 - cdf_g(g0))
 
-    # Now for the internal minima: the easiest probability to compute
-    # is the probability that a point is allowed to be an internal
-    # minimum for some realization of beta
+    # Now for internal minima: we just follow the equation in the latex.
 
-    lower_inner_int_b = lambda t: (lambda s: jnorm.pdf(s, mu_t, sigma_t)
-                                 * (t < find_b0(s, travel_time)))
-
-    t_points = 800
-    ts = jnp.linspace(0, 24, t_points)
-
-    prob_lower_b = lambda t: trapezoid(vmap(lower_inner_int_b(t))(ts), ts, axis=0)
-    normalization_term_b = trapezoid(vmap(pdf_b)(ts) * vmap(prob_lower_b)(ts), ts, axis=0)
-
-    # Here, nan_to_num is used to avoid situations in which the
-    # division is 0/0.  In this case, the result can be assumed to be
-    # zero since the denominator is actually 0.
+    # Here, t_a is transformed so that it always returns a plausible
+    # result for an early or late arrival. If the actual t_a is not
+    # plausible, the pdf of beta will return zero and not yield any
+    # problem. These transformations are anyway necessary because
+    # impossible values cannot be fed to find_be and find_gi
+    # (functions to which this check could be delegated)
     
-    conditional_pdf_b = jnp.nan_to_num(pdf_b(travel_time.df(t_a)) * prob_lower_b(travel_time.df(t_a)) / normalization_term_b)
-    prob_allowed_b = conditional_pdf_b * relu(travel_time.d2f(t_a))
-
-    lower_inner_int_g = lambda t: (lambda s: jnorm.pdf(s, mu_t, sigma_t)
-                                   * (t < find_g0(s, travel_time)))
-
-    prob_lower_g = lambda t: trapezoid(vmap(lower_inner_int_g(t))(ts), ts, axis=0)
-    normalization_term_g = trapezoid(vmap(pdf_g)(ts) * vmap(prob_lower_g)(ts), ts, axis=0)
+    t_a_early = jnp.where(jnp.logical_and(travel_time.df(t_a) > 0, travel_time.d2f(t_a) > 0), t_a, 0)
+    t_a_late = jnp.where(jnp.logical_and(travel_time.df(t_a) < 0, travel_time.d2f(t_a) > 0), t_a, 24)
     
-    conditional_pdf_g = jnp.nan_to_num(pdf_g(-travel_time.df(t_a)) * prob_lower_g(-travel_time.df(t_a)) / normalization_term_g)
-    prob_allowed_g = conditional_pdf_g * relu(travel_time.d2f(t_a))
+    int_early = jnorm.cdf(find_be(t_a_early, travel_time), mu_t, sigma_t) - jnorm.cdf(t_a, mu_t, sigma_t)
 
+    lik_early = int_early * pdf_b(travel_time.df(t_a)) * relu(travel_time.d2f(t_a))
 
-    # This probability has to be mutiplied to the probability that t*
-    # is actually in the interval that would yield a constant minimum,
-    # that is itself the probability of beta yielding a certain
-    # interval times the probability of t* being in that interval.
-    def inner_int_b(b):
-        bs = find_bs(b, travel_time)
-        return (jnorm.cdf(bs[1], mu_t, sigma_t) - jnorm.cdf(bs[0], mu_t, sigma_t)) * pdf_b(b)
+    int_late = jnorm.cdf(t_a, mu_t, sigma_t) - jnorm.cdf(find_gi(t_a_late, travel_time), mu_t, sigma_t)
     
-    def inner_int_g(g):
-        gs = find_gs(g, travel_time)
-        return (jnorm.cdf(gs[1], mu_t, sigma_t) - jnorm.cdf(gs[0], mu_t, sigma_t)) * pdf_g(g)
-    
-    min_b = 1e-2
-    points = 200
-    x_b = jnp.linspace(min_b, travel_time.maxb, points)
-    fx_b = vmap(inner_int_b)(x_b)
-    int_result_b = trapezoid(fx_b, x_b, axis=0)
+    lik_late = int_late * pdf_g(-travel_time.df(t_a)) * relu(travel_time.d2f(t_a))
 
-    min_g = 1
-    
-    x_g = jnp.linspace(min_g, travel_time.maxg, points)
-    fx_g = vmap(inner_int_g)(x_g)
-    int_result_g = trapezoid(fx_g, x_g, axis=0)
-    likelihood_internal = int_result_b * prob_allowed_b + int_result_g * prob_allowed_g
+    likelihood_internal = lik_early + lik_late
     likelihood = likelihood_kink + likelihood_internal
     return jnp.maximum(likelihood, 1e-31)
 
