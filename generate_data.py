@@ -18,7 +18,7 @@ def find_td(travel_time):
     """
     def inner_find_td(beta, gamma, t_star):
         cost_fun = cost(travel_time)
-        solver = GradientDescent(fun=cost_fun)
+        solver = GradientDescent(fun=cost_fun, acceleration=False, stepsize=.1, maxiter=1000)
         lval, _ = solver.run(0., beta, gamma, t_star)
         rval, _ = solver.run(24., beta, gamma, t_star)
         val = jnp.where(cost_fun(rval, beta, gamma, t_star) < cost_fun(lval, beta, gamma, t_star), rval, lval)
