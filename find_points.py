@@ -48,7 +48,7 @@ def find_b0(t_a, travel_time):
 
     # A really low and a really high value are defined as starting points for the bisection
     min = 1e-2
-    max = 1
+    max = travel_time.maxb
 
     # The objective function, an indicator function that shows wether the parameter t_a
     # is in the interval for a given beta, is defined
@@ -145,7 +145,13 @@ def find_g0(t_a, travel_time):
 def find_ts(beta, gamma, travel_time):
     gamma += 1e-15
     beta += 1e-15
-    b_i, b_e = find_bs(beta, travel_time)
-    g_i, g_e = find_gs(gamma, travel_time)
+    # Here, calls to find_bs and find_gs with invalid values have to
+    # be avoided: if gamma is too big, ts should return infinite (or
+    # 24)
+    gamma_adapted = jnp.minimum(gamma, travel_time.maxg - 1e-2)
+    beta_adapted = jnp.minimum(beta, travel_time.maxb - 1e-2)
+    b_i, b_e = find_bs(beta_adapted, travel_time)
+    g_i, g_e = find_gs(gamma_adapted, travel_time)
     num = beta * b_i - travel_time.f(b_i) + gamma * g_e + travel_time.f(g_e)
-    return num / (beta + gamma)
+    res = num / (beta + gamma)
+    return jnp.where(gamma < travel_time.maxg, jnp.where(beta < travel_time.maxb, res, 0), 24)

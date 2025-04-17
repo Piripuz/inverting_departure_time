@@ -47,7 +47,7 @@ def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
 
     inner_int_early = lambda x: inner_int_early_cdf(x) * pdf_g(x)
 
-    x_gamma = jnp.linspace(1, travel_time.maxg, 100)
+    x_gamma = jnp.linspace(1, 10, 600)
 
     int_early = trapezoid(vmap(inner_int_early)(x_gamma), x_gamma, axis=0)
     lik_early = int_early * pdf_b(travel_time.df(t_a)) * relu(travel_time.d2f(t_a))
@@ -55,7 +55,7 @@ def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
 
     inner_int_late = lambda x: inner_int_late_cdf(x) * pdf_b(x)
 
-    x_beta = jnp.linspace(1e-2, travel_time.maxb, 100)
+    x_beta = jnp.linspace(1e-2, 1 - 1e-2, 600)
 
     int_late = trapezoid(vmap(inner_int_late)(x_beta), x_beta, axis=0)
 
