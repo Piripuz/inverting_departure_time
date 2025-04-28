@@ -20,12 +20,16 @@ from generate_data import generate_arrival
 from travel_times import asymm_gaussian_plateau
 from retrieve_data import likelihood, total_log_lik, total_liks
 from utils import TravelTime
+from smooth_data import TravelData
 
 import numpy as np
 #%%
 num = 1000
 tt = TravelTime(asymm_gaussian_plateau())
 par = (.4, 1.4, 10., .1, 1.5)
+tdata = TravelData()
+tt_data_func = tdata.make_func()
+tt_data = TravelTime(tt_data_func)
 betas, gammas, ts, t_as = generate_arrival(num, tt, *par)
 
 @jit
