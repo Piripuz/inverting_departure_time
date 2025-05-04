@@ -4,10 +4,18 @@ import jax.numpy as jnp
 from jaxopt import GradientDescent
 
 class TravelTime():
-    def __init__(self, function):
+    def __init__(self, function, df=None, d2f=None):
         self.f = function
-        self.df = grad(function)
-        self.d2f = grad(grad(function))
+        if df is None:
+            self.df = grad(function)
+        else:
+            self.df = df
+
+        if d2f is None:
+            self.d2f = grad(grad(function))
+        else:
+            self.d2f = d2f
+
         self.maxb, self.maxg = self.__find_ders()
         
     def __find_ders(self):
