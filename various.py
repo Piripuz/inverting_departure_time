@@ -17,7 +17,7 @@ import time
 from tqdm import tqdm
 
 from generate_data import generate_arrival
-from travel_times import asymm_gaussian_plateau
+from travel_times import asymm_gaussian_plateau, asymm_gaussian
 from retrieve_data import likelihood, total_log_lik, total_liks
 from utils import TravelTime
 from smooth_data import TravelData
@@ -25,11 +25,23 @@ from smooth_data import TravelData
 import numpy as np
 #%%
 num = 1000
-tt = TravelTime(asymm_gaussian_plateau())
-par = (.4, 1.4, 10., .1, 1.5)
 tdata = TravelData()
 tt_data_func = tdata.make_func()
 tt_data = TravelTime(tt_data_func)
+tt = TravelTime(asymm_gaussian())
+x = np.linspace(5, 15, 800)
+
+start_time = time.time()
+plt.plot(x, vmap(tt.df)(x))
+print(f"tt in {time.time() - start_time} seconds")
+
+start_time = time.time()
+plt.plot(x, vmap(tt_data.df)(x))
+print(f"tt_data in {time.time() - start_time} seconds")
+
+plt.show()
+
+par = (.2, 2.5, 9., .5, 1.5)
 betas, gammas, ts, t_as = generate_arrival(num, tt, *par)
 
 @jit
@@ -41,11 +53,10 @@ def obj_fun(par):
     print(("{:8.4f}"*5).format(*par))
     return lik_fun(par)
 #%%
-
-g_betas = jnp.linspace(.01, .9, 6)
-g_gammas = jnp.linspace(1, 4, 4)
-g_ts = jnp.linspace(6, 11, 3)
-g_sigmas = jnp.linspace(.1, .5, 5)
+g_betas = jnp.linspace(.01, tt.maxb, 5)#6
+g_gammas = jnp.linspace(1, tt.maxg, 5)#6
+g_ts = jnp.linspace(6, 11, 3)#3
+g_sigmas = jnp.linspace(.1, .5, 5)#5
 g_sigmats = jnp.linspace(1, 4, 3)
 
 mesh_par = jnp.meshgrid(g_betas, g_gammas, g_ts, g_sigmas, g_sigmats)
@@ -86,15 +97,14 @@ print(jnp.array(val))
 print("finished optimizing")
 print(f"{time.time() - start_time} seconds")
 #%%
-x = jnp.linspace(6, 15, 500)
+x = jnp.linspace(6, 15, 1000)
 liks_x_real = total_liks(tt, x)(*par)
-liks_x_found = total_liks(tt, x)(*res.x)
+# liks_x_found = total_liks(tt, x)(*res.x)
 #%%
-h = 100
-
-plt.hist(t_as, 100)
+h = 700
+plt.hist(t_as, 200)
 plt.fill_between(x, liks_x_real*h, alpha=.3, color="red", label='Real likelihood')
-plt.fill_between(x, liks_x_found*h, alpha=.3, color="green", label='Retrieved likelihood')
+# plt.fill_between(x, liks_x_found*h, alpha=.3, color="green", label='Retrieved likelihood')
 plt.xlim(6, 13)
 # plt.ylim(0, 400)
 plt.legend()
@@ -118,7 +128,7 @@ fig.show()
 #%%
 ll_actual = lambda x, y: total_log_lik(tt, t_as)(x, y, *par[2:])
 ll_optimized = lambda x, y: total_log_lik(tt, t_as)(x, y, *res.x[2:])
-betas_contour =jnp.linspace(.01, .99, 200)
+betas_contour =jnp.linspace(.01, .99, 201)
 gammas_contour = jnp.linspace(1.01, 4, 200)
 m_contour = jnp.meshgrid(betas_contour, gammas_contour)
 matrix_actual = vmap(vmap(ll_actual, (0, None)), (None, 0))(betas_contour, gammas_contour) # vmap(ll_actual)(*m_contour)
