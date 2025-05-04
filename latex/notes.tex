@@ -586,7 +586,7 @@ The probability can thus be reformulated as
 
 \begin{equation}
   \label{eq:prob_gamabeta}
-  \mathbb{P}(t^* \in (b_i(\beta), t_s(\beta, \gamma)), T^* = t^*) = \prob
+  \mathbb{P}(t^* \in (b_i(\beta), t_s(\beta, \gamma)), T^* = t^*) 
 \end{equation}
 
 \subsubsection{Estimation of $\mathbb{P}(L=0 | Q=1)$}
@@ -679,6 +679,8 @@ Plugging the last equations in the expression for \(f_{T_a}\) yields
 
 \subsubsection{Zhenyu's version}
 
+\paragraph{For non crossing $\beta, \gamma$}
+
 According to Zhenyu, we have
 
 \begin{equation*}
@@ -701,7 +703,11 @@ This would considerably simplify \eqref{eq:final_likelihood}, which would become
   + (F_{T^*}(t_a) - F_{T^*}(g_i(-tt_a'(t_a)))) f_\gamma(-tt_a'(t_a))[tt_a''(t_a)]^+
 \end{multline}
 
-This seems like it is working!! Let's extend it to the case in which \textcolor{orange}{\(\gamma\) and \(\beta\) interact}.
+This seems like it is working!!
+
+\paragraph{For intersecting $\beta, \gamma$}
+
+Let's extend it to the case in which \textcolor{orange}{\(\gamma\) and \(\beta\) interact}.
 
 \begin{align*}
     f_{T_a, \hat{Q}}(t_a, -1) & = \mathbb{P}(t^* \in (b_i(\beta), \min(b_e(\beta), t_s(\beta, \gamma)))) | b_i(\beta) = t_a)f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
@@ -720,8 +726,8 @@ The total expression for the likelihood \eqref{eq:final_zhenyu} becomes thus
 \begin{multline}
   \label{eq:zhenyu_accounting_int}
   f_{T_a}(t_a) = f_{T^*}(t_a)\int_{\beta_0(t_a)}^{\beta_\text{max}}f_\beta(b)\, db\int_{\gamma_0(t_a)}^{\gamma_\text{max}}f_\gamma(g)\, dg \\
-  + \int_1^\infty f_\gamma(x) (F_{T^*}(\min(b_e(tt_a'(t_a)), t_s(tt_a'(t_a), x))) - F_{T^*}(t_a)) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+ \\
-  + \int_0^1f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(\max(g_i(-tt_a'(t_a)), t_s(x, -tt_a'(t_a)))) ) dx\ f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+  
+  + f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+\int_1^\infty f_\gamma(x) (F_{T^*}(\min(b_e(tt_a'(t_a)), t_s(tt_a'(t_a), x))) - F_{T^*}(t_a)) dx\  \\
+  + f_\beta(tt_a'(t_a))[tt_a''(t_a)]^+  \int_0^1f_\beta(x) (F_{T^*}(t_a) - F_{T^*}(\max(g_i(-tt_a'(t_a)), t_s(x, -tt_a'(t_a)))) ) dx\ 
 \end{multline}
 
 TO BE IMPLEMENTED:
@@ -838,6 +844,79 @@ until the integral becomes larger than the bottleneck length \(d^p\).
 Figure \ref{fig:modifying_data} shows the result of this process, for different values of the parameter \(d^p\).
 Sadly, plotting the derivative is not particularly meaningful without smoothing the function beforehand,
 since the function is piecewise constant.
+
+\section{Finding a travel time function from simulated data}
+
+\subsection{Interpolation methods}
+
+For finding a travel time function, scipy offers some interpolating functions.
+
+The main ones I identified are
+\begin{itemize}
+\item Radial Basis Functions interpolation
+\item Interpolating spline
+\item Approximating spline
+\end{itemize}
+
+I'll briefly discuss the three methods.
+
+
+\subsubsection{RBF}
+
+Radial Basis Functions interpolation consists in interpolating the data points by a function that is a sum of many \textit{radial} functions,
+namely functions that depend only on the distance of a point from a centre (that is, in my understanding, each data point).
+
+By using gaussians this method could yield a really good result.
+It anyway has several drawbacks.
+
+\begin{itemize}
+\item First of all, the output is a sum of a really big number of functions (the data points I am working with are 10.000).
+  Working with all of the points yields a pretty good result,
+  while I didn't manage to have a good function with a subset of the points (or a small set of points built approximating the full dataset).
+\item Often, in the MLE, it is needed to work with the derivative of the function.
+
+  Scipy doesn't offer a way to compute the derivative, even if a priori it is not something difficult to compute.
+  I considered implementing this myself into scipy, but without solving the first issue this was not particularly useful.
+\end{itemize}
+
+\subsubsection{Approximating spline}
+
+This is a spline in which the node do not need to coincide with the data points:
+the spline is built accordingly to the nodes,
+by minimizing the LSQ between the resulting spline and the data points.
+
+It has some strange requirements on the nodes, that are though usually pretty easy to fulfill (usually, by putting exactly \(k+1\) nodes on the first point of the dataset).
+
+An issue with the LSQ is that it doesn't weigh evenly the various times of the day:
+since the data are definitely not evenly spread,
+in zones in which arrivals are not frequent the function could behave unexpectedly.
+This could of course be solved by interpolating the data on an evenly space grid (\verb|np.linspace|),
+but in this case just using an interpolating spline could be simpler.
+
+Being a spline, the returned function is easily differentiable (since the scipy class \verb|BSpline| simply has a method \verb|derivative()|).
+
+\subsubsection{Interpolating spline}
+
+Polynomials of degree \(k\), glued on the data points by keeping the first \(k-1\) derivatives continuous.
+
+This is definitely the simplest method, and a possibility is doing some smoothing on the data and later building an interpolating spline on the smoothed data points.
+
+\subsection{Building the function}
+
+For building the function, I decided to use the interpolating spline on smoothed data.
+
+Data are smoothed by using a \textit{Savgol filter}, that is not particularly different from a spline:
+on a sliding window of a chosen size (that I am currently setting \(n/10\) long),
+a polynomial of a chosen degree is built to minimise the distance (I think LSQ, but not sure) with the points,
+and the central point of the window is then set on the value of this polynomial.
+
+Setting the polynomial to be a line (of degree 1) yields a pretty strong regularizer,
+that is not a bad idea here.
+The data are then interpolated on a regularly spread grid,
+anda spline is then built on top of the interpolated ones.
+
+The degree of the spline doesn't change the behaviour almost at all (in the file \verb|read_out.py| there is a nice plot about it, comparing k=8 to k=2),
+only makes the derivatives more continuous.
 
 \end{document}
 %%% Local Variables:
