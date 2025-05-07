@@ -402,7 +402,7 @@ plt.close()
 #%%
 frames = 80
 for i in tqdm(range(frames)):
-    plot_cost(.95, 1.6, 9+i/frames).savefig(f"../seminar/slides/slides/img/animation/frame_{i}.png", dpi=600)
+    plot_cost(.95, 1.6, 9+(i/frames)*1.2).savefig(f"../seminar/slides/slides/img/animation/frame_{i}.png", dpi=600)
     plt.close()
 plt.close()
 #%%
