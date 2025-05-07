@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-from scipy.signal import savgol_filter
-# from scipy.interpolate import make_interp_spline
-from interpax import Interpolator1D
+
+from fit_function import fit_to_data
+
+
 
 class TravelData():
     def __init__(self, data_path="data/metropolis/output"):
@@ -18,24 +19,24 @@ class TravelData():
         self.ag_ttime_1 = np.array(ag_res.total_travel_time[ag_res.selected_alt_id == 1]/60)
 
     def make_func(self):
-        init_points = self.n//2
-        fin_points = self.n//2
+        # init_points = self.n//2
+        # fin_points = self.n//2
         
-        ag_ttime_ext = np.r_[
-            (self.ag_ttime[0],)*init_points,
-            self.ag_ttime,
-            (self.ag_ttime[-1],)*init_points
-             ]
+        # ag_ttime_ext = np.r_[
+        #     (self.ag_ttime[0],)*init_points,
+        #     self.ag_ttime,
+        #     (self.ag_ttime[-1],)*init_points
+        #      ]
         
-        arr_time_ext = np.r_[
-            np.linspace(0, self.arr_time[0], init_points),
-            self.arr_time,
-            np.linspace(0, self.arr_time[-1], fin_points)
-            ]
+        # arr_time_ext = np.r_[
+        #     np.linspace(0, self.arr_time[0], init_points),
+        #     self.arr_time,
+        #     np.linspace(0, self.arr_time[-1], fin_points)
+        #     ]
 
-        # ag_ttime_int
-        y = savgol_filter(self.ag_ttime, self.n // 100, 1)
-        x_int = np.linspace(0, 24, 800)
-        y_int = np.interp(x_int, self.arr_time, y)
-        # return make_interp_spline(x_int, y_int, k=2)
-        return Interpolator1D(x_int, y_int, 'cubic2')
+        # # ag_ttime_int
+        # y = savgol_filter(self.ag_ttime, self.n // 100, 1)
+        # x_int = np.linspace(0, 24, 800)
+        # y_int = np.interp(x_int, self.arr_time, y)
+        # # return make_interp_spline(x_int, y_int, k=2)
+        return fit_to_data(self.arr_time, self.ag_ttime)
