@@ -20,10 +20,10 @@ def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
     # cdf_g = lambda g: jnorm.cdf(g, mu_g, sigma)
     # pdf_b = lambda b: jnorm.pdf(b, mu_b, sigma)
     # pdf_g = lambda g: jnorm.pdf(g, mu_g, sigma)
-    cdf_b = lambda b: jtruncnorm.cdf(b, -mu_b / sigma, (1 - mu_b) / sigma, loc=mu_b, scale=sigma)
-    cdf_g = lambda g: jtruncnorm.cdf(g, (1 -mu_g) / sigma, 100000, loc=mu_g, scale=sigma)
-    pdf_b = lambda b: jtruncnorm.pdf(b, -mu_b / sigma, (1 - mu_b) / sigma, mu_b, sigma)
-    pdf_g = lambda g: jtruncnorm.pdf(g, (1 - mu_g) / sigma, 10000, mu_g, sigma)
+    cdf_b = lambda b: jtruncnorm.cdf(b, -mu_b / sigma, 10000, loc=mu_b, scale=sigma)
+    cdf_g = lambda g: jtruncnorm.cdf(g, -mu_g / sigma, 10000, loc=mu_g, scale=sigma)
+    pdf_b = lambda b: jtruncnorm.pdf(b, -mu_b / sigma, 10000, mu_b, sigma)
+    pdf_g = lambda g: jtruncnorm.pdf(g, -mu_g / sigma, 10000, mu_g, sigma)
 
     # For computing the probability that a point is a kink minimum, an
     # integral is computed as in the latex.
@@ -47,7 +47,7 @@ def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
 
     inner_int_early = lambda x: inner_int_early_cdf(x) * pdf_g(x)
 
-    x_gamma = jnp.linspace(1, 10, 600)
+    x_gamma = jnp.linspace(1e-2, 10, 200)
 
     int_early = trapezoid(vmap(inner_int_early)(x_gamma), x_gamma, axis=0)
     lik_early = int_early * pdf_b(travel_time.df(t_a)) * relu(travel_time.d2f(t_a))
@@ -55,7 +55,7 @@ def likelihood(travel_time, t_a, mu_b, mu_g, mu_t, sigma, sigma_t):
 
     inner_int_late = lambda x: inner_int_late_cdf(x) * pdf_b(x)
 
-    x_beta = jnp.linspace(1e-2, 1 - 1e-2, 600)
+    x_beta = jnp.linspace(1e-2, 10, 200)
 
     int_late = trapezoid(vmap(inner_int_late)(x_beta), x_beta, axis=0)
 

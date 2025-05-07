@@ -120,7 +120,7 @@ def find_g0(t_a, travel_time):
 
     # A really low and a really high value are defined as starting
     # points for the bisection
-    min = 1
+    min = 1e-2
     max = travel_time.maxg
 
     # The objective function, an indicator function that shows wether
