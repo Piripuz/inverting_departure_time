@@ -53,10 +53,10 @@ def obj_fun(par):
     print(("{:8.4f}"*5).format(*par))
     return lik_fun(par)
 #%%
-g_betas = jnp.linspace(.01, tt.maxb, 5)#6
-g_gammas = jnp.linspace(1, tt.maxg, 5)#6
+g_betas = jnp.linspace(.01, tt.maxb, 6)#6
+g_gammas = jnp.linspace(.01, tt.maxg, 6)#6
 g_ts = jnp.linspace(6, 11, 3)#3
-g_sigmas = jnp.linspace(.1, .5, 5)#5
+g_sigmas = jnp.linspace(.1, .5, 4)#5
 g_sigmats = jnp.linspace(1, 4, 3)
 
 mesh_par = jnp.meshgrid(g_betas, g_gammas, g_ts, g_sigmas, g_sigmats)
@@ -129,13 +129,13 @@ fig.show()
 ll_actual = lambda x, y: total_log_lik(tt, t_as)(x, y, *par[2:])
 ll_optimized = lambda x, y: total_log_lik(tt, t_as)(x, y, *res.x[2:])
 betas_contour =jnp.linspace(.01, .99, 201)
-gammas_contour = jnp.linspace(1.01, 4, 200)
+gammas_contour = jnp.linspace(.01, 4, 200)
 m_contour = jnp.meshgrid(betas_contour, gammas_contour)
 matrix_actual = vmap(vmap(ll_actual, (0, None)), (None, 0))(betas_contour, gammas_contour) # vmap(ll_actual)(*m_contour)
 matrix_optimized = vmap(vmap(ll_optimized, (0, None)), (None, 0))(betas_contour, gammas_contour) # vmap(ll_optimized)(*m_contour)
 #%%
 X, Y = jnp.meshgrid(betas_contour, gammas_contour)
-plt.contour(betas_contour, gammas_contour, matrix_actual, levels=50)
+plt.contour(betas_contour, gammas_contour, matrix_optimized, levels=50)
 plt.plot(par[0], par[1], 'or')
 plt.plot(res.x[0], res.x[1], 'og')
 plt.xlabel("mu_b")
